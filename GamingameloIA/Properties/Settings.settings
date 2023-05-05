@@ -8,5 +8,11 @@
     <Setting Name="ProfileID" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\Users\marco\source\repos\GamingameloIA\MyCredentials\ProfileID.txt</Value>
     </Setting>
+    <Setting Name="OpenIA" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Users\marco\source\repos\GamingameloIA\MyCredentials\APIKeyOpenIA.txt</Value>
+    </Setting>
+    <Setting Name="MongoDB" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Users\marco\source\repos\GamingameloIA\MyCredentials\Mongo.txt</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -46,5 +46,29 @@ namespace GamingameloIA.Properties {
                 this["ProfileID"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\marco\\source\\repos\\GamingameloIA\\MyCredentials\\APIKeyOpenIA.txt")]
+        public string OpenIA {
+            get {
+                return ((string)(this["OpenIA"]));
+            }
+            set {
+                this["OpenIA"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\marco\\source\\repos\\GamingameloIA\\MyCredentials\\Mongo.txt")]
+        public string MongoDB {
+            get {
+                return ((string)(this["MongoDB"]));
+            }
+            set {
+                this["MongoDB"] = value;
+            }
+        }
     }
 }

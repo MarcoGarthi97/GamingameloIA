@@ -7,12 +7,25 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using static System.Collections.Specialized.BitVector32;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GamingameloIA
 {
     internal class WebSite
     {
-        public void GetInformationsSite(string url)
+        public string GetBestArticle(List<Article> articles)
+        {
+            string summarizes = "";
+            foreach (Article article in articles)
+                summarizes += "\n" + article.Summarize;
+
+            OpenIA openIA = new OpenIA();
+            string bestArticle = openIA.Summarize("Choose the best description for Instagram from these here. I want as answer the number of the description, starting from 0", summarizes);
+
+            return bestArticle;
+        }
+
+        public List<Article> GetInformationsSiteGamesRadar(string url)
         {
             var lastThree = GetLatestNews(url);
             if(lastThree.Count < 3)
@@ -20,6 +33,10 @@ namespace GamingameloIA
                 //Error Code..
             }
 
+            OpenIA openIA = new OpenIA();
+            MongoDB mongo = new MongoDB();
+
+            List<Article> summmarizedArticles = new List<Article>();
             foreach(string link in lastThree)
             {
                 var response = GetStructureSite(link);
@@ -44,7 +61,20 @@ namespace GamingameloIA
                 }
 
                 article = CleanUpArticle(article);
+
+                List<Article> articles = mongo.GetArticles();
+
+                string summerize = "";
+                if (articles.Find(x => x.Text == article) == null)
+                    summerize = openIA.Summarize("Create me a description for post instagram of maximum 1100 characters, minimum 800 characters and use emoticon with this text:\n", article);
+                else
+                    summerize = articles.Find(x => x.Text == article).Summarize;
+
+                Article art = new Article("GamesRadar", article, summerize.Trim(), DateTime.Now, false);
+                summmarizedArticles.Add(art);
             }
+
+            return summmarizedArticles;
         }
 
         private string CleanUpArticle(string article)
@@ -61,22 +91,34 @@ namespace GamingameloIA
                 int endIndex = article.IndexOf(endFilter, startIndex);
                 string a = article.Substring(startIndex, endIndex - startIndex + endFilter.Length);
 
-                int startA = article.IndexOf("<u>") + "<u>".Length;
-                int endA = article.IndexOf("</u>", startIndex);
-                string val = article.Substring(startA, endA - startA);
+                if (article.Contains("<u"))
+                {
+                    int startA = article.IndexOf("<u>") + "<u>".Length;
+                    int endA = article.IndexOf("</u>", startIndex);
+                    string val = article.Substring(startA, endA - startA);
 
-                article = article.Replace(a, val);
+                    article = article.Replace(a, val);
+                }
+                else
+                {
+                    string s = a.Substring(a.IndexOf(">") + 1, a.LastIndexOf("<") - a.IndexOf(">") - 1);
+
+                    article = article.Replace(a, s);
+                }                
 
                 if (article.Contains("<span"))
                 {
                     int startSpan = article.IndexOf("<span");
                     int endSpan = article.IndexOf("</span>", startSpan);
 
-                    article = article.Remove(startSpan, endSpan - startSpan + 7);
+                    article = article.Remove(startSpan, endSpan - startSpan + 7);                   
+                }
 
+                if (article.Contains("<em"))
+                {
                     article = article.Replace("<em>", "").Replace("</em>", "");
                 }
-            }
+            }            
 
             return article;
         }
