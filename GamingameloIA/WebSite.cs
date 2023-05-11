@@ -17,17 +17,17 @@ namespace GamingameloIA
         {
             string summarizes = "";
             foreach (Article article in articles)
-                summarizes += "\n" + article.Summarize;
+                summarizes += "\n\n" + articles.IndexOf(article) + ") " + article.Summarize;
 
             OpenIA openIA = new OpenIA();
-            string bestArticle = openIA.Summarize("Choose the best description for Instagram from these here. I want as answer the number of the description, starting from 0", summarizes);
+            string indexBestArticle = openIA.Summarize("Choose the text below that you like best for a post on Instagram:", summarizes);
 
-            return bestArticle;
+            return indexBestArticle.Substring(2);
         }
 
-        public List<Article> GetInformationsSiteGamesRadar(string url)
+        public List<Article> GetInformationsSite(Sites site)
         {
-            var lastThree = GetLatestNews(url);
+            var lastThree = GetLatestNews(site.Link);
             if(lastThree.Count < 3)
             {
                 //Error Code..
@@ -66,7 +66,10 @@ namespace GamingameloIA
 
                 string summerize = "";
                 if (articles.Find(x => x.Text == article) == null)
-                    summerize = openIA.Summarize("Create me a description for post instagram of maximum 1100 characters, minimum 800 characters and use emoticon with this text:\n", article);
+                {
+                    summerize = openIA.Summarize("Use this text to create a description for an instagram post, use emoticons as well\n", article);
+                    mongo.InsertArticle(new Article("GamesRadar", article, summerize.Trim(), DateTime.Now, false));
+                }
                 else
                     summerize = articles.Find(x => x.Text == article).Summarize;
 
@@ -122,7 +125,28 @@ namespace GamingameloIA
 
             return article;
         }
+
         private List<string> GetLatestNews(string url)
+        {
+            var response = GetStructureSite(url);
+            string section = response.Substring(response.IndexOf("<section data-next=\"latest\""), response.IndexOf("<div class=\"static-lightbox3 ad-unit\">") - response.IndexOf("<section data-next=\"latest\""));
+
+            List<string> lastThree = new List<string>();
+            for (int i = 0; i < 3; i++)
+            {
+                int startIndex = section.IndexOf("href=\"") + 6;
+                int endIndex = section.IndexOf("\"", startIndex + 1);
+                string link = section.Substring(startIndex, endIndex - startIndex);
+
+                lastThree.Add(link);
+
+                section = section.Remove(startIndex - 7, endIndex - startIndex + 7);
+            }
+
+            return lastThree;
+        }
+
+        private List<string> GetLatestNewsGamesRadar(string url)
         {
             var response = GetStructureSite(url);
             string section = response.Substring(response.IndexOf("<section data-next=\"latest\""), response.IndexOf("<div class=\"static-lightbox3 ad-unit\">") - response.IndexOf("<section data-next=\"latest\""));

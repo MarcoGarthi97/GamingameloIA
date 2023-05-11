@@ -11,21 +11,27 @@ namespace GamingameloIA
         static void Main(string[] args)
         {
             Meta meta = new Meta();
-            WebSite site = new WebSite();
+            WebSite webSite = new WebSite();
             MongoDB mongo = new MongoDB();
-            //string id = meta.CreateContainer("https://www.lapaginaonline.it/giornale/wp-content/uploads/2018/12/Attachment-1.jpeg", "My mum <3");
-            //string insert = meta.PublicContainer(id);
+            OpenIA openIA = new OpenIA();
 
-            List<Article> latesArticlesGamesRadar = site.GetInformationsSiteGamesRadar("https://www.gamesradar.com/news/games/");
+            var sites = mongo.GetSites();
 
-            List<Article> articles = mongo.GetArticles();
-            foreach (var articleGamesRadar in latesArticlesGamesRadar)
+            foreach(var site in sites)
             {
-                if(articles.Find(x => x.Text == articleGamesRadar.Text)  == null)
-                    mongo.InsertArticle(articleGamesRadar);
+                List<Article> latesArticlesGamesRadar = webSite.GetInformationsSite(site);
+
+                //Sistema rating o per scegliere l'articolo migliore così dà troppi problemi
+                //string bestArticle = site.GetBestArticle(latesArticlesGamesRadar);
+                string bestArticle = latesArticlesGamesRadar.OrderByDescending(x => x.Summarize.Length).First().Summarize;
+
+                string url = openIA.Image(bestArticle);
+
+                string id = meta.CreateContainer(url, bestArticle);
+                string insert = meta.PublicContainer(id);
             }
 
-            string bestArticle = site.GetBestArticle(latesArticlesGamesRadar);
+            
         }
     }
 }

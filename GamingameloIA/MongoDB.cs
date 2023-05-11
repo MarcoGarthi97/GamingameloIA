@@ -1,4 +1,5 @@
 ﻿using GamingameloIA.Properties;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,49 @@ namespace GamingameloIA
             return mongoClient.GetDatabase("GamingameloDB");
         }
 
+        public List<Sites> GetSites()
+        {
+            List<Sites> sites = new List<Sites>();
+
+            try
+            {
+                var intelligenziameloDB = GetDatabase();
+
+                IMongoCollection<Sites> sitesAtlas = intelligenziameloDB.GetCollection<Sites>("Sites");
+
+                sites = sitesAtlas.Aggregate().ToList();
+
+                foreach (var site in sites)
+                {
+                    sites.Find(x => x.Name == site.Name).NewsScraping = GetNewsScraping(site.Name);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return sites;
+        }
+
+        public NewsScraping GetNewsScraping(string name)
+        {
+            NewsScraping newsScraping = new NewsScraping();
+            try
+            {
+                var intelligenziameloDB = GetDatabase();
+
+                IMongoCollection<NewsScraping> newsScrapingAtlas = intelligenziameloDB.GetCollection<NewsScraping>("NewsScraping");
+
+                newsScraping = newsScrapingAtlas.Find(x => x.Name == name).First();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return newsScraping;
+        }
 
         public List<Article> GetArticles(string filter = null)
         {

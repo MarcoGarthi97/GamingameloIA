@@ -25,8 +25,7 @@ namespace GamingameloIA
                 var request = new RestRequest("https://api.openai.com/v1/completions", Method.Post);
                 request.AddHeader("Content-Type", "application/json");
                 request.AddHeader("Authorization", "Bearer " + _bearer);
-                var body = json;
-                request.AddStringBody(body, DataFormat.Json);
+                request.AddStringBody(json, DataFormat.Json);
                 RestResponse response = client.Execute(request);
 
                 var resultOpenIA = JsonConvert.DeserializeObject<ResponseSummarized>(response.Content);
@@ -40,6 +39,58 @@ namespace GamingameloIA
             }
 
             return result;
+        }
+
+        public string Image(string command)
+        {
+            try
+            {
+                ImageIA image = new ImageIA(command, 1, "1024x1024");
+                string json = JsonConvert.SerializeObject(image);
+
+                var client = new RestClient();
+                var request = new RestRequest("https://api.openai.com/v1/images/generations", Method.Post);
+                request.AddHeader("Content-Type", "application/json");
+                request.AddHeader("Authorization", "Bearer " + _bearer);
+                var body = json;
+                request.AddStringBody(body, DataFormat.Json);
+                RestResponse response = client.Execute(request);
+
+                ResponseImageIA responseIA = JsonConvert.DeserializeObject<ResponseImageIA>(response.Content);
+
+                return responseIA.data[0].url;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return "";
+        }
+    }
+
+    class ResponseImageIA
+    {
+        public int created { get; set; }
+        public List<ResponseImageIAData> data { get; set; }
+    }
+
+    class ResponseImageIAData
+    {
+        public string url { get; set; }
+    }
+
+    class ImageIA
+    {
+        public string prompt { get; set; }
+        public int n { get; set; }
+        public string size { get; set; }
+
+        public ImageIA(string prompt, int n, string size)
+        {
+            this.prompt = prompt;
+            this.n = n;
+            this.size = size;
         }
     }
 

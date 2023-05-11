@@ -28,6 +28,15 @@ namespace GamingameloIA
         }
     }
 
+    public class NewsScraping
+    {
+        [BsonIgnoreIfDefault]
+        public ObjectId Id { get; set; }
+        public string Name { get; set; }
+        public string Start { get; set; }
+        public string End { get; set; }
+    }
+
     public class Sites
     {
         [BsonIgnoreIfDefault]
@@ -35,6 +44,7 @@ namespace GamingameloIA
         public string Name { get; set; }
         public string Link { get; set; }
         public string NewsPage { get; set; }
+        public NewsScraping NewsScraping { get; set; }
 
         public Sites (string name, string link, string newsPage)
         {

@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using RestSharp;
+using SharpCompress.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -20,8 +22,14 @@ namespace GamingameloIA
         {
             try 
             {
-                var client = new RestClient();
-                var request = new RestRequest(_link + _profileID + "/media?image_url=" + link + "&resize=1200%3A*&caption=" + caption + "&access_token=" + _token, Method.Post);
+                Uri uri = new Uri(link);
+                var client = new RestClient("https://graph.facebook.com/v16.0/" + _profileID + "/media");
+                var request = new RestRequest();
+                request.AddParameter("caption", caption);
+                request.AddParameter("resize", "1200%3A*");
+                request.AddParameter("access_token", _token);
+                request.AddParameter("image_url", link);
+                request.Method = Method.Post;
                 RestResponse response = client.Execute(request);
                 Console.WriteLine(response.Content);
 
